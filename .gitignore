@@ -1,0 +1,9 @@
+*.cmake
+
+*.bin
+
+*.out
+
+build/*
+
+xcode/*
