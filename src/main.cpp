@@ -162,15 +162,15 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s, const vec
 }
 
 const double STOP_COST = 0.2;
-const double BUFFER_V = 3;
+const double BUFFER_V = 1;
 const double speed_limit = 50;
-const double target_speed = 47;
+const double target_speed = 49;
 const double max_acc = 10;
 const double s_weight = 100;
 const double v_weight = 1.0;
 const double a_weight = 1.0;
 const double l_weight = 1.0;
-const double safety_margin_s = 20;
+const double safety_margin_s = 30;
 
 struct trajectory {
   int lane;
@@ -195,7 +195,7 @@ double calculate_cost_pos(trajectory future_tra , car_position other_car)
   double s_cost = 0.0;
   if(d_diff < 3.0 && s_diff < safety_margin_s) {
     printf("Collision detected\n");
-    s_cost = 1.0 - s_diff/safety_margin_s;
+    s_cost = 2.0 - s_diff/safety_margin_s;
   }
   
   double total_cost = s_weight * s_cost;
@@ -210,7 +210,7 @@ double calculate_cost(trajectory future_tra , trajectory current_tra)
   } else if(future_tra.v >= target_speed && future_tra.v < speed_limit){
     v_cost = (future_tra.v - target_speed) / BUFFER_V;
   } else {
-    v_cost = 1.0;
+    v_cost = 10.0;
   }
   
   double a_cost = 0.0;
@@ -220,9 +220,9 @@ double calculate_cost(trajectory future_tra , trajectory current_tra)
   
   double l_cost = 0.0;
   if(future_tra.lane < 0 || future_tra.lane > 2) {
-    l_cost = 100.0;
+    l_cost = 1000.0;
   } else if(future_tra.lane != current_tra.lane) {
-    l_cost = 0.2;
+    l_cost = 0.3;
   }
   
   double total_cost =  v_weight * v_cost + a_weight * a_cost + l_weight * l_cost;
