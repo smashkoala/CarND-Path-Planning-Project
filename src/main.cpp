@@ -194,7 +194,6 @@ double calculate_cost_pos(trajectory future_tra , car_position other_car)
   
   double s_cost = 0.0;
   if(d_diff < 3.0 && s_diff < safety_margin_s) {
-    printf("Collision detected\n");
     s_cost = 2.0 - s_diff/safety_margin_s;
   }
   
@@ -326,7 +325,14 @@ void predict_car_position(car_position current, car_position &future, double tim
   future.d = current.d;
 }
 
-
+void printCostList(double cost_list[][3])
+{
+  for(int k = 0 ; k < 3 ; k++) {
+    for(int i = 0 ; i < 3 ; i++) {
+      printf("t=%d s=%d cost:%f\n", k, i, cost_list[k][i]);
+    }
+  }
+}
 
 int main() {
   uWS::Hub h;
@@ -437,6 +443,7 @@ int main() {
                 current_car_p.s = sensor_fusion[j][5];
                 current_car_p.a = 0;
                 car_position future_car_p;
+                cost_list[act_t][act_s] += calculate_cost_pos(current_tra, current_car_p);
                 predict_car_position(current_car_p, future_car_p, 0.5);
                 cost_list[act_t][act_s] += calculate_cost_pos(future_tra, future_car_p);
               }
@@ -460,6 +467,24 @@ int main() {
             printf("Lane change!!");
             printf("Actions turn = %d speed = %d\n", acb.turn, acb.speed);
             printf("Lane No. = %d\n", lane);
+            printCostList(cost_list);
+            for(int j = 0 ; j < sensor_fusion.size() ; j++){
+              double s = sensor_fusion[j][5];
+              double d = sensor_fusion[j][6];
+              printf("sensor d:%lf, s:%lf\n", d, s);
+              car_position current_car_p;
+              current_car_p.d = sensor_fusion[j][6];
+              double vx = sensor_fusion[j][3];
+              double vy = sensor_fusion[j][4];
+              current_car_p.v = sqrt(vx*vx+vy*vy);
+              current_car_p.s = sensor_fusion[j][5];
+              current_car_p.a = 0;
+              car_position future_car_p;
+              predict_car_position(current_car_p, future_car_p, 0.5);
+              printf("future sensor d:%lf, s:%lf\n", future_car_p.d, future_car_p.s);
+            }
+            printf("Current tra d:%f s:%f\n", current_tra.d, current_tra.s);
+            printf("Future tra d:%f s:%f\n", trajectory_list[acb.turn][acb.speed].d, trajectory_list[acb.turn][acb.speed].s);
           }
           json msgJson;
 
