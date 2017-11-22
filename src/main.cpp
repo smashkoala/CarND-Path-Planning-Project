@@ -170,7 +170,8 @@ const double s_weight = 100;
 const double v_weight = 1.0;
 const double a_weight = 1.0;
 const double l_weight = 1.0;
-const double safety_margin_s = 30;
+const double safety_margin_s_h = 30;
+const double safety_margin_s_t = -50;
 
 struct trajectory {
   int lane;
@@ -189,12 +190,16 @@ struct car_position {
 
 double calculate_cost_pos(trajectory future_tra , car_position other_car)
 {
-  double s_diff = abs(other_car.s - future_tra.s);
+  double s_diff = other_car.s - future_tra.s;
   double d_diff = abs(other_car.d - future_tra.d);
   
   double s_cost = 0.0;
-  if(d_diff < 3.0 && s_diff < safety_margin_s) {
-    s_cost = 2.0 - s_diff/safety_margin_s;
+  if(d_diff < 3.0 ) {
+    if(s_diff < safety_margin_s_h && s_diff >= 0) {
+      s_cost = 2.0 - s_diff/safety_margin_s_h;
+    } else if(s_diff < 0 && s_diff > safety_margin_s_t) {
+      s_cost = 2.0 - s_diff/safety_margin_s_t;
+    }
   }
   
   double total_cost = s_weight * s_cost;
