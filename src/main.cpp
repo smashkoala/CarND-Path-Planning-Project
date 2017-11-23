@@ -224,9 +224,13 @@ double calculate_cost(trajectory future_tra , trajectory current_tra)
   
   double l_cost = 0.0;
   if(future_tra.lane < 0 || future_tra.lane > 2) {
-    l_cost = 1000.0;
+    l_cost = 1000.0;    //Impossible
   } else if(future_tra.lane != current_tra.lane) {
-    l_cost = 0.3;
+    if(current_tra.v < 30) {
+      l_cost = 1000.0;  //Impossible
+    } else {
+      l_cost = 0.3;
+    }
   }
   
   double total_cost =  v_weight * v_cost + a_weight * a_cost + l_weight * l_cost;
