@@ -170,8 +170,8 @@ const double s_weight = 100;
 const double v_weight = 1.0;
 const double a_weight = 1.0;
 const double l_weight = 1.0;
-const double safety_margin_s_h = 30;
-const double safety_margin_s_t = -50;
+const double safety_margin_s_h = 40;
+const double safety_margin_s_t = -40;
 
 struct trajectory {
   int lane;
@@ -191,7 +191,7 @@ struct car_position {
 
 double calculate_cost_pos(trajectory future_tra , trajectory current_tra, car_position other_car)
 {
-  double s_diff = other_car.s - future_tra.s;
+  double s_diff = other_car.s - future_tra.s + 25;
   double d_diff = abs(other_car.d - future_tra.d);
   
   double s_cost = 0.0;
@@ -199,11 +199,15 @@ double calculate_cost_pos(trajectory future_tra , trajectory current_tra, car_po
     if(s_diff < safety_margin_s_h && s_diff >= 0) {
       s_cost = 2.0 - s_diff/safety_margin_s_h;
       if(s_diff < 1.0) {
-        printf("Collision!!\n");
+        printf("Collision ahead!!\n");
         s_cost += 10.0 * (1.0 - s_diff);
       }
     } else if(s_diff < 0 && s_diff > safety_margin_s_t && future_tra.lane != current_tra.lane) {
       s_cost = 2.0 - s_diff/safety_margin_s_t;
+      if(s_diff > -1.0) {
+        printf("Collision tail!!\n");
+        s_cost += 10.0 * (1.0 - abs(s_diff));
+      }
     }
   }
   
@@ -442,9 +446,10 @@ int main() {
           //Loop through all possible actions(state)
           for(int act_t = keep_lane ; act_t < actions_turn_end ; act_t++) {
             for(int act_s = keep ; act_s < actions_speed_end ; act_s++) {
-              trajectory future_tra_01 = { 0 };
-              genetate_trajectory(current_tra, future_tra_01, (actions_turn)act_t,
-                                  (actions_speed)act_s, 0.1);
+//              trajectory future_tra_01 = { 0 };
+//              genetate_trajectory(current_tra, future_tra_01, (actions_turn)act_t,
+//                                  (actions_speed)act_s, 0.1);
+//              trajectory_list[act_t][act_s] = future_tra_01;
               trajectory future_tra_05 = { 0 };
               genetate_trajectory(current_tra, future_tra_05, (actions_turn)act_t,
                                   (actions_speed)act_s, 0.5);
@@ -479,11 +484,11 @@ int main() {
             if(current_tra.v < 30) {
               ref_vel = current_tra.v + 2.0;
             } else {
-              ref_vel = current_tra.v + 1.0;
+              ref_vel = current_tra.v + 0.8;
             }
           } else if(acb.speed == speed_down) {
             printf("Slowing down\n");
-            ref_vel = current_tra.v - 0.8;
+            ref_vel = current_tra.v - 1.0;
           } else {
             ref_vel = current_tra.v;
           }
