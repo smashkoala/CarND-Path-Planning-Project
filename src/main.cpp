@@ -198,9 +198,9 @@ double calculate_cost_pos(trajectory future_tra , trajectory current_tra, car_po
   if(d_diff < 3.0) {
     if(s_diff < safety_margin_s_h && s_diff >= 0) {
       s_cost = 2.0 - s_diff/safety_margin_s_h;
-      if(s_diff < 2) {
+      if(s_diff < 1.0) {
         printf("Collision!!\n");
-        s_cost += 10.0;
+        s_cost += 10.0 * (1.0 - s_diff);
       }
     } else if(s_diff < 0 && s_diff > safety_margin_s_t && future_tra.lane != current_tra.lane) {
       s_cost = 2.0 - s_diff/safety_margin_s_t;
@@ -300,7 +300,7 @@ int genetate_trajectory(const trajectory current, trajectory& future, actions_tu
       future.v = current.v;
       break;
     case speed_up:
-      future.a = 1.0;//Assumption
+      future.a = 0.5;//Assumption
       future.v = current.v + future.a * time;
       break;
     case speed_down:
