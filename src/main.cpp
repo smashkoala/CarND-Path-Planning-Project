@@ -172,6 +172,9 @@ const double a_weight = 1.0;
 const double l_weight = 1.0;
 const double safety_margin_s_h = 30;
 const double safety_margin_s_t = -30;
+const double offset = 10.0;
+const double abs_distance = 1.0;
+const double d_distance = 3.0;
 
 struct trajectory {
   int lane;
@@ -188,25 +191,25 @@ struct car_position {
   double a;
 };
 
-
+// Calculate the cost based on the distances between the Ego car and other vehicles
 double calculate_cost_pos(trajectory future_tra , trajectory current_tra, car_position other_car)
 {
-  double s_diff = other_car.s - future_tra.s + 5;//Offset = 5
+  double s_diff = other_car.s - future_tra.s + offset;  //Offset = 10
   double d_diff = abs(other_car.d - future_tra.d);
   
   double s_cost = 0.0;
-  if(d_diff < 3.0) {
+  if(d_diff < d_distance) {
     if(s_diff < safety_margin_s_h && s_diff >= 0) {
       s_cost = 2.0 - s_diff/safety_margin_s_h;
-      if(s_diff < 1.0) {
+      if(s_diff < abs_distance) {
         printf("Collision ahead!!\n");
-        s_cost += 10.0 * (1.0 - s_diff);
+        s_cost += 10.0 * (abs_distance - s_diff);
       }
     } else if(s_diff < 0 && s_diff > safety_margin_s_t && future_tra.lane != current_tra.lane) {
       s_cost = 2.0 - s_diff/safety_margin_s_t;
-      if(s_diff > -1.0) {
+      if(s_diff > -abs_distance) {
         printf("Collision tail!!\n");
-        s_cost += 10.0 * (1.0 - abs(s_diff));
+        s_cost += 10.0 * (abs_distance - abs(s_diff));
       }
     }
   }
@@ -215,6 +218,7 @@ double calculate_cost_pos(trajectory future_tra , trajectory current_tra, car_po
   return total_cost;
 }
 
+// Calculate the cost for future trajectory except distances between the Ego car and other vehicles
 double calculate_cost(trajectory future_tra , trajectory current_tra)
 {
   double v_cost = 0.0;
@@ -265,6 +269,7 @@ struct action_combinations {
   actions_speed speed;
 };
 
+// Device the next actions to take
 action_combinations decice_next_action(double cost_list[][3]) {
   action_combinations acb;
   
@@ -296,7 +301,7 @@ int get_lane_number(double d) {
   return lane;
 }
 
-//const double acc = 4.0;
+// Trajectory generation function to calculate cost for each trajectory
 int genetate_trajectory(const trajectory current, trajectory& future, actions_turn a_turn, actions_speed a_speed, double time){
   switch(a_speed) {
     case keep:
@@ -304,11 +309,11 @@ int genetate_trajectory(const trajectory current, trajectory& future, actions_tu
       future.v = current.v;
       break;
     case speed_up:
-      future.a = 2.0 * 1609.34 / (60*60);
+      future.a = 0.8; // 0.8 m/s2
       future.v = current.v + future.a * time;
       break;
     case speed_down:
-      future.a = -10.0 * 1609.34 / (60*60);
+      future.a = -4.5; // 4.5 m/s2
       future.v = current.v + future.a * time;
       break;
     default:
@@ -396,7 +401,6 @@ int main() {
     //auto sdata = string(data).substr(0, length);
     //cout << sdata << endl;
     int lane = 1;
-    double target_vel = 47;
     
     if (length && length > 2 && data[0] == '4' && data[1] == '2') {
       auto s = hasData(data);
@@ -432,9 +436,8 @@ int main() {
             car_s = end_path_s;
           }
           
-          //transisition_function(sensor_fusion_data, current_lane, car_s, car_d)
-          //This should return the next state
-          //Changes made by this function is lane, target_vel or speed increase
+          //The following is the path planning processes
+          //At the end, it decides the next actions for lane and speed.
           trajectory current_tra;
           current_tra.s = car_s;
           current_tra.d = car_d;
@@ -446,14 +449,9 @@ int main() {
           //Loop through all possible actions(state)
           for(int act_t = keep_lane ; act_t < actions_turn_end ; act_t++) {
             for(int act_s = keep ; act_s < actions_speed_end ; act_s++) {
-//              trajectory future_tra_01 = { 0 };
-//              genetate_trajectory(current_tra, future_tra_01, (actions_turn)act_t,
-//                                  (actions_speed)act_s, 0.1);
-//              trajectory_list[act_t][act_s] = future_tra_01;
               trajectory future_tra_05 = { 0 };
               genetate_trajectory(current_tra, future_tra_05, (actions_turn)act_t,
                                   (actions_speed)act_s, 0.5);
-              
               trajectory_list[act_t][act_s] = future_tra_05;
               
               //Checking sensor fusion data of all other cars
@@ -465,10 +463,9 @@ int main() {
                 current_car_p.v = sqrt(vx*vx+vy*vy);
                 current_car_p.s = sensor_fusion[j][5];
                 current_car_p.a = 0;
-//                car_position future_car_p_01;
-//                predict_car_position(current_car_p, future_car_p_01, 0.1);
-//                cost_list[act_t][act_s] += calculate_cost_pos(future_tra_01, current_tra, future_car_p_01);
                 car_position future_car_p_05;
+                
+                //Predict other cars position in 0.5 seconds
                 predict_car_position(current_car_p, future_car_p_05, 0.5);
                 cost_list[act_t][act_s] += calculate_cost_pos(future_tra_05, current_tra, future_car_p_05);
               }
@@ -476,13 +473,15 @@ int main() {
             }
           }
           
-          //Execute actions
+          //Decide actions based on the calculated costs
           action_combinations acb = decice_next_action(cost_list);
+          
+          //Execture actions from here
           lane = trajectory_list[acb.turn][acb.speed].lane;
           if(acb.speed == speed_up) {
             printf("Speeding up\n");
             if(car_speed < 30) {
-              ref_vel = car_speed + 2.0;
+              ref_vel = car_speed + 2.0;//(2.0 MPH * 1609.34 / (60*60) = 0.894 (m/s) => 44.7 (m/s2)
             } else {
               ref_vel = car_speed + 0.8;
             }
@@ -493,6 +492,7 @@ int main() {
             ref_vel = car_speed;
           }
 
+          //Print out the information when lane change happens
           if(current_tra.lane != lane) {
             printf("Lane change!!");
             printf("Actions turn = %d speed = %d\n", acb.turn, acb.speed);
@@ -516,6 +516,8 @@ int main() {
             printf("Current tra d:%f s:%f\n", current_tra.d, current_tra.s);
             printf("Future tra d:%f s:%f\n", trajectory_list[acb.turn][acb.speed].d, trajectory_list[acb.turn][acb.speed].s);
           }
+          
+          
           json msgJson;
 
           vector<double> ptsx;
@@ -605,6 +607,7 @@ int main() {
             double x_ref = x_point;
             double y_ref = y_point;
             
+            //Shift back the angles to XY cordinates
             x_point = (x_ref*cos(ref_yaw) - y_ref*sin(ref_yaw));
             y_point = (x_ref*sin(ref_yaw) + y_ref*cos(ref_yaw));
             
@@ -615,7 +618,9 @@ int main() {
             next_y_vals.push_back(y_point);
           }
           
-          // TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+          //
+          //Define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
+          //
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
 
