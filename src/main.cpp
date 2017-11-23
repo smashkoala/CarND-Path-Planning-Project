@@ -299,7 +299,7 @@ int genetate_trajectory(const trajectory current, trajectory& future, actions_tu
       future.v = current.v + future.a * time;
       break;
     case speed_down:
-      future.a = -acc*10;
+      future.a = -acc*15;
       future.v = current.v + future.a * time;
       break;
     default:
@@ -452,7 +452,7 @@ int main() {
                 current_car_p.s = sensor_fusion[j][5];
                 current_car_p.a = 0;
                 car_position future_car_p;
-                cost_list[act_t][act_s] += calculate_cost_pos(current_tra, current_car_p);
+                //cost_list[act_t][act_s] += calculate_cost_pos(current_tra, current_car_p);
                 predict_car_position(current_car_p, future_car_p, 0.5);
                 cost_list[act_t][act_s] += calculate_cost_pos(future_tra, future_car_p);
               }
@@ -464,14 +464,20 @@ int main() {
           action_combinations acb = decice_next_action(cost_list);
           lane = trajectory_list[acb.turn][acb.speed].lane;
           if(acb.speed == speed_up) {
-            ref_vel = current_tra.v + 8.0*0.2;
+            printf("Speeding up\n");
+            if(current_tra.v < 30) {
+              ref_vel = current_tra.v + 2.0;
+            } else {
+              ref_vel = current_tra.v + 1.0;
+            }
           } else if(acb.speed == speed_down) {
             printf("Slowing down\n");
-            ref_vel = current_tra.v - 4.0*0.2;
+            ref_vel = current_tra.v - 0.8;
           } else {
             ref_vel = current_tra.v;
           }
 
+//          printf("current s = %f\n", current_tra.s);
           if(current_tra.lane != lane) {
             printf("Lane change!!");
             printf("Actions turn = %d speed = %d\n", acb.turn, acb.speed);
