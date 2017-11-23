@@ -446,6 +446,7 @@ int main() {
 
           double cost_list[3][3] = { {0} };
           trajectory trajectory_list[3][3] = { {{0}} };
+          
           //Loop through all possible actions(state)
           for(int act_t = keep_lane ; act_t < actions_turn_end ; act_t++) {
             for(int act_s = keep ; act_s < actions_speed_end ; act_s++) {
@@ -465,7 +466,7 @@ int main() {
                 current_car_p.a = 0;
                 car_position future_car_p_05;
                 
-                //Predict other cars position in 0.5 seconds
+                //Predict other car's positions in 0.5 seconds
                 predict_car_position(current_car_p, future_car_p_05, 0.5);
                 cost_list[act_t][act_s] += calculate_cost_pos(future_tra_05, current_tra, future_car_p_05);
               }

@@ -1,6 +1,37 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
-   
+
+### Project writeup
+1) The code compiles correctly.
+Yes, it does. The code is here.
+
+2) The car is able to drive at least 4.32 miles without incident.
+Yes, the car is able to drive longer than 4.32 miles. The video clip is here.
+
+3) The car drives according to the speed limit.
+In the code, the target speed is set 47 MPH, and it does NOT exceed the speed limit
+of 50 MPH.
+
+4) Max Acceleration and Jerk are not Exceeded.
+It does not exceed the limits of max acceleration and jerk.
+The acceleration is adjusted by some experiments. When the car starts moving at the begging,
+it is expected to accelerate 2.0 MPH during 0.02 seconds, which is 2.0 * 1609.34 / (3600 * 0.02) = 44.07 m/s2. This does not mean that the car accelerates 44.07 m/s2 since this value is used to generate the trajectories of future path. It was set this way, since it takes too much time for the car to speed up if the acceleration is set less than 10 m/s2 at the begging.
+When the car speed becomes faster than 30 MPH, the acceleration is set 0.8 MPH, which is 0.8 * 1609.34 / (3600 * 0.02) = 17.9 m /s2. The deceleration is the same with minus value.
+With these settings, after some tries, it was confirmed that the max acceleration and the jerk did not exceed the limit.
+
+5) Car does not have collisions.
+It does not have collisions. The code checks if others cars are within plus minus 30 meter. If they are, the cost of the chosen actions are penalized with higher cost values.
+
+6) The car stays in its lane, except for the time between changing lanes.
+It does stay in its lane except lane changes. The future trajectories are drawn based on which lanes to go. Once the lane to drive is chosen, a continuous trajectory is drawn for the next 30, 60 and 90m on the Ferenet coordinate. The car follows this trajectory, and it does not stop in the middle of the lane.
+
+7) The car is able to change lanes
+If other cars are ahead of the car, and the distance between the other car and the car gets closer, if no other car stays on either of left or right lanes, and if it has clearance of plus minus 30 meter in left or right lane, it changes the lane based on the calculated costs of lane change vs staying in current lane.
+
+8) There is a reflection on how to generate paths.
+Here, I will explain how the path is generated in the code.
+The main() in main.cpp consists of mainly three parts. 1) Possible path generation 2)Cost calculation for each path 3) Path decision making 4) Trajectory generation
+
 ### Simulator.
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).
 
@@ -38,13 +69,13 @@ Here is the data provided from the Simulator to the C++ Program
 #### Previous path data given to the Planner
 
 //Note: Return the previous list but with processed points removed, can be a nice tool to show how far along
-the path has processed since last time. 
+the path has processed since last time.
 
 ["previous_path_x"] The previous list of x points previously given to the simulator
 
 ["previous_path_y"] The previous list of y points previously given to the simulator
 
-#### Previous path's end s and d values 
+#### Previous path's end s and d values
 
 ["end_path_s"] The previous list's last point's frenet s value
 
@@ -52,7 +83,7 @@ the path has processed since last time.
 
 #### Sensor Fusion Data, a list of all other car's attributes on the same side of the road. (No Noise)
 
-["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
+["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates.
 
 ## Details
 
@@ -82,7 +113,7 @@ A really helpful resource for doing this project and creating smooth trajectorie
   * Run either `install-mac.sh` or `install-ubuntu.sh`.
   * If you install from source, checkout to commit `e94b6e1`, i.e.
     ```
-    git clone https://github.com/uWebSockets/uWebSockets 
+    git clone https://github.com/uWebSockets/uWebSockets
     cd uWebSockets
     git checkout e94b6e1
     ```
@@ -137,4 +168,3 @@ still be compilable with cmake and make./
 
 ## How to write a README
 A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
