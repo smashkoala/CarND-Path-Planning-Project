@@ -195,11 +195,12 @@ double calculate_cost_pos(trajectory future_tra , trajectory current_tra, car_po
   double d_diff = abs(other_car.d - future_tra.d);
   
   double s_cost = 0.0;
-  if(d_diff < 3.0 ) {
+  if(d_diff < 3.0) {
     if(s_diff < safety_margin_s_h && s_diff >= 0) {
       s_cost = 2.0 - s_diff/safety_margin_s_h;
-      if(s_diff < 5) {
+      if(s_diff < 2) {
         printf("Collision!!\n");
+        s_cost += 10.0;
       }
     } else if(s_diff < 0 && s_diff > safety_margin_s_t && future_tra.lane != current_tra.lane) {
       s_cost = 2.0 - s_diff/safety_margin_s_t;
