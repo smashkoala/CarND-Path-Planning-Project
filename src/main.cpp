@@ -476,12 +476,14 @@ int main() {
           //Decide actions based on the calculated costs
           action_combinations acb = decice_next_action(cost_list);
           
+          //
           //Execture actions from here
+          //
           lane = trajectory_list[acb.turn][acb.speed].lane;
           if(acb.speed == speed_up) {
             printf("Speeding up\n");
             if(car_speed < 30) {
-              ref_vel = car_speed + 2.0;//(2.0 MPH * 1609.34 / (60*60) = 0.894 (m/s) => 44.7 (m/s2)
+              ref_vel = car_speed + 2.0;
             } else {
               ref_vel = car_speed + 0.8;
             }
@@ -491,8 +493,10 @@ int main() {
           } else {
             ref_vel = car_speed;
           }
-
+          
+          //
           //Print out the information when lane change happens
+          //
           if(current_tra.lane != lane) {
             printf("Lane change!!");
             printf("Actions turn = %d speed = %d\n", acb.turn, acb.speed);
