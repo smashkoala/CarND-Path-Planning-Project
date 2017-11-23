@@ -162,16 +162,16 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s, const vec
 }
 
 const double STOP_COST = 0.5;
-const double BUFFER_V = 3;
-const double speed_limit = 50;
-const double target_speed = 47;
+const double BUFFER_V = 3 * 1609.34 / (60*60);
+const double speed_limit = 50 * 1609.34 / (60*60);
+const double target_speed = 47 * 1609.34 / (60*60);
 const double max_acc = 10;
 const double s_weight = 100;
 const double v_weight = 1.0;
 const double a_weight = 1.0;
 const double l_weight = 1.0;
-const double safety_margin_s_h = 40;
-const double safety_margin_s_t = -40;
+const double safety_margin_s_h = 30;
+const double safety_margin_s_t = -30;
 
 struct trajectory {
   int lane;
@@ -191,7 +191,7 @@ struct car_position {
 
 double calculate_cost_pos(trajectory future_tra , trajectory current_tra, car_position other_car)
 {
-  double s_diff = other_car.s - future_tra.s + 25;
+  double s_diff = other_car.s - future_tra.s + 5;//Offset = 5
   double d_diff = abs(other_car.d - future_tra.d);
   
   double s_cost = 0.0;
@@ -235,7 +235,7 @@ double calculate_cost(trajectory future_tra , trajectory current_tra)
   if(future_tra.lane < 0 || future_tra.lane > 2) {
     l_cost = 1000.0;    //Impossible
   } else if(future_tra.lane != current_tra.lane) {
-    if(current_tra.v < 30) {
+    if(current_tra.v < 30*1609.34 / (60*60)) {
       l_cost = 1000.0;  //Impossible
     } else {
       l_cost = 0.3;
@@ -304,11 +304,11 @@ int genetate_trajectory(const trajectory current, trajectory& future, actions_tu
       future.v = current.v;
       break;
     case speed_up:
-      future.a = 0.5;//Assumption
+      future.a = 2.0 * 1609.34 / (60*60);
       future.v = current.v + future.a * time;
       break;
     case speed_down:
-      future.a = -120.0;
+      future.a = -10.0 * 1609.34 / (60*60);
       future.v = current.v + future.a * time;
       break;
     default:
@@ -414,7 +414,7 @@ int main() {
           double car_s = j[1]["s"];
           double car_d = j[1]["d"];
           double car_yaw = j[1]["yaw"];
-          double car_speed = j[1]["speed"];
+          double car_speed = j[1]["speed"];//This is mile.
           double ref_vel = car_speed;
 
           // Previous path data given to the Planner
@@ -438,7 +438,7 @@ int main() {
           trajectory current_tra;
           current_tra.s = car_s;
           current_tra.d = car_d;
-          current_tra.v = car_speed;
+          current_tra.v = car_speed * 1609.34 / (60*60); //MPH to meter/s conversion
           current_tra.lane = get_lane_number(current_tra.d);
 
           double cost_list[3][3] = { {0} };
@@ -481,16 +481,16 @@ int main() {
           lane = trajectory_list[acb.turn][acb.speed].lane;
           if(acb.speed == speed_up) {
             printf("Speeding up\n");
-            if(current_tra.v < 30) {
-              ref_vel = current_tra.v + 2.0;
+            if(car_speed < 30) {
+              ref_vel = car_speed + 2.0;
             } else {
-              ref_vel = current_tra.v + 0.8;
+              ref_vel = car_speed + 0.8;
             }
           } else if(acb.speed == speed_down) {
             printf("Slowing down\n");
-            ref_vel = current_tra.v - 1.0;
+            ref_vel = car_speed - 0.8;
           } else {
-            ref_vel = current_tra.v;
+            ref_vel = car_speed;
           }
 
           if(current_tra.lane != lane) {
