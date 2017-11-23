@@ -161,10 +161,10 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s, const vec
 
 }
 
-const double STOP_COST = 0.2;
-const double BUFFER_V = 1;
+const double STOP_COST = 0.5;
+const double BUFFER_V = 3;
 const double speed_limit = 50;
-const double target_speed = 49;
+const double target_speed = 47;
 const double max_acc = 10;
 const double s_weight = 100;
 const double v_weight = 1.0;
@@ -188,7 +188,8 @@ struct car_position {
   double a;
 };
 
-double calculate_cost_pos(trajectory future_tra , car_position other_car)
+
+double calculate_cost_pos(trajectory future_tra , trajectory current_tra, car_position other_car)
 {
   double s_diff = other_car.s - future_tra.s;
   double d_diff = abs(other_car.d - future_tra.d);
@@ -197,7 +198,10 @@ double calculate_cost_pos(trajectory future_tra , car_position other_car)
   if(d_diff < 3.0 ) {
     if(s_diff < safety_margin_s_h && s_diff >= 0) {
       s_cost = 2.0 - s_diff/safety_margin_s_h;
-    } else if(s_diff < 0 && s_diff > safety_margin_s_t) {
+      if(s_diff < 5) {
+        printf("Collision!!\n");
+      }
+    } else if(s_diff < 0 && s_diff > safety_margin_s_t && future_tra.lane != current_tra.lane) {
       s_cost = 2.0 - s_diff/safety_margin_s_t;
     }
   }
@@ -287,7 +291,7 @@ int get_lane_number(double d) {
   return lane;
 }
 
-const double acc = 8.0;
+//const double acc = 4.0;
 int genetate_trajectory(const trajectory current, trajectory& future, actions_turn a_turn, actions_speed a_speed, double time){
   switch(a_speed) {
     case keep:
@@ -295,11 +299,11 @@ int genetate_trajectory(const trajectory current, trajectory& future, actions_tu
       future.v = current.v;
       break;
     case speed_up:
-      future.a = acc;
+      future.a = 1.0;//Assumption
       future.v = current.v + future.a * time;
       break;
     case speed_down:
-      future.a = -acc*15;
+      future.a = -120.0;
       future.v = current.v + future.a * time;
       break;
     default:
@@ -437,10 +441,14 @@ int main() {
           //Loop through all possible actions(state)
           for(int act_t = keep_lane ; act_t < actions_turn_end ; act_t++) {
             for(int act_s = keep ; act_s < actions_speed_end ; act_s++) {
-              trajectory future_tra = { 0 };
-              genetate_trajectory(current_tra, future_tra, (actions_turn)act_t,
+              trajectory future_tra_01 = { 0 };
+              genetate_trajectory(current_tra, future_tra_01, (actions_turn)act_t,
+                                  (actions_speed)act_s, 0.1);
+              trajectory future_tra_05 = { 0 };
+              genetate_trajectory(current_tra, future_tra_05, (actions_turn)act_t,
                                   (actions_speed)act_s, 0.5);
-              trajectory_list[act_t][act_s] = future_tra;
+              
+              trajectory_list[act_t][act_s] = future_tra_05;
               
               //Checking sensor fusion data of all other cars
               for(int j = 0 ; j < sensor_fusion.size() ; j++){
@@ -451,12 +459,14 @@ int main() {
                 current_car_p.v = sqrt(vx*vx+vy*vy);
                 current_car_p.s = sensor_fusion[j][5];
                 current_car_p.a = 0;
-                car_position future_car_p;
-                //cost_list[act_t][act_s] += calculate_cost_pos(current_tra, current_car_p);
-                predict_car_position(current_car_p, future_car_p, 0.5);
-                cost_list[act_t][act_s] += calculate_cost_pos(future_tra, future_car_p);
+//                car_position future_car_p_01;
+//                predict_car_position(current_car_p, future_car_p_01, 0.1);
+//                cost_list[act_t][act_s] += calculate_cost_pos(future_tra_01, current_tra, future_car_p_01);
+                car_position future_car_p_05;
+                predict_car_position(current_car_p, future_car_p_05, 0.5);
+                cost_list[act_t][act_s] += calculate_cost_pos(future_tra_05, current_tra, future_car_p_05);
               }
-              cost_list[act_t][act_s] += calculate_cost(future_tra, current_tra);
+              cost_list[act_t][act_s] += calculate_cost(future_tra_05, current_tra);
             }
           }
           
@@ -477,7 +487,6 @@ int main() {
             ref_vel = current_tra.v;
           }
 
-//          printf("current s = %f\n", current_tra.s);
           if(current_tra.lane != lane) {
             printf("Lane change!!");
             printf("Actions turn = %d speed = %d\n", acb.turn, acb.speed);
