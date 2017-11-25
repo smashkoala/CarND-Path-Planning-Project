@@ -28,7 +28,7 @@ In the cost calculation function, the actions that exceeds over 47MPH are severe
 > It does not exceed the limits of max acceleration and jerk.
 The acceleration is adjusted by some experiments. When the car starts moving at the begging,
 it is expected to accelerate 2.0 MPH during 0.02 seconds, which is 2.0 * 1609.34 / (3600 * 0.02) = 44.07 m/s2. This does not mean that the car accelerates 44.07 m/s2 since this value is used to generate the trajectories of future path. It was set this way, since it takes too much time for the car to speed up if the acceleration is set less than 10 m/s2 at the begging.
-When the car speed becomes faster than 30 MPH, the acceleration is set 0.8 MPH, which is 0.8 * 1609.34 / (3600 * 0.02) = 17.9 m /s2. The deceleration is the same with minus value.
+When the car speed becomes faster than 30 MPH, the acceleration is set 0.8 MPH, which is 0.8 * 1609.34 / (3600 * 0.02) = 17.9 m /s2. The deceleration is the same with negative value.
 With these settings, after some experiments, it was confirmed that the max acceleration and the jerk did not exceed the limit. (line 484-496 in main.cpp)
 
 6) Car does not have collisions.  
