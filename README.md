@@ -12,7 +12,7 @@ Self-Driving Car Engineer Nanodegree Program
 > Here, I will explain how the path is generated in the code.
 The main() in main.cpp consists of mainly four parts.  
 (1) Possible path prediction (line 431-475 of main() in main.cpp)  
-(2)Cost calculation for each path(471-473 of main(), calculate_cost_pos() and calculate_cost() line 195-251 in main.cpp)  
+(2) Cost calculation for each path(471-473 of main(), calculate_cost_pos() and calculate_cost() line 195-251 in main.cpp)  
 (3) Path decision making (line 478 of main(), decide_next_action() line 273-290 in main.cpp)  
 (4) Trajectory generation.(line 499-570 in main.cpp)
 
