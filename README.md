@@ -3,34 +3,34 @@ Self-Driving Car Engineer Nanodegree Program
 
 ### Project writeup
 1) The code compiles correctly.  
-Yes, it does. The code is here.
+> Yes, it does. See [this](https://github.com/smashkoala/CarND-Path-Planning-Project) repository in GitHub.
 
 2) The car is able to drive at least 4.32 miles without incident.  
-Yes, the car is able to drive longer than 4.32 miles. The video clip is here.
+> Yes, the car is able to drive longer than 4.32 miles. The video clip is [here](https://github.com/smashkoala/CarND-Path-Planning-Project/blob/master/4_3Miles.mp4).
 
 3) There is a reflection on how to generate paths.
-Here, I will explain how the path is generated in the code.
-The main() in main.cpp consists of mainly three parts. 1) Possible path prediction (line 431-475 of main() ) 2)Cost calculation for each path(471-473 of main(), calculate_cost_pos() and calculate_cost() line 195-251) 3) Path decision making (line 478 of main(), decide_next_action() line 273-290) 4) Trajectory generation . 3 x 3 actions (Lange change: Keep, left, right, speed change: Keep, speed up, speed down) are used to predict the possible paths. And for each action combination, the cost is calculated. It chooses the lowest cost action combinations. In the process of 4), based on the chosen lane, the next waypoints of 30m, 60m and 90m are calculated. Using spline.h and these waypoints, the trajectory is calculated. The chosen speed is then used to calculate the next 30m path and points that car actually follows every 0.2s.
+> Here, I will explain how the path is generated in the code.
+The main() in main.cpp consists of mainly three parts. 1) Possible path prediction (line 431-475 of main() in main.cpp) 2)Cost calculation for each path(471-473 of main(), calculate_cost_pos() and calculate_cost() line 195-251) 3) Path decision making (line 478 of main(), decide_next_action() line 273-290 in main.cpp) 4) Trajectory generation . 3 x 3 actions (Lange change: Keep, left, right, speed change: Keep, speed up, speed down) are used to predict the possible paths. And for each action combination, the cost is calculated. It chooses the lowest cost action combinations. In the process of 4), based on the chosen lane, the next waypoints of 30m, 60m and 90m are calculated. Using spline.h and these waypoints, the trajectory is calculated. The chosen speed is then used to calculate the next 30m path and points that car actually follows every 0.2s.
 
 4) The car drives according to the speed limit.  
-In the code, the target speed is set 47 MPH, and it does NOT exceed the speed limit of 50 MPH.
-In the cost calculation function, the actions that exceeds over 47MPH is severely penalized. (calculate_cost() line 222-250)
+> In the code, the target speed is set 47 MPH, and it does NOT exceed the speed limit of 50 MPH.
+In the cost calculation function, the actions that exceeds over 47MPH is severely penalized. (calculate_cost() line 222-250 in main.cpp)
 
 5) Max Acceleration and Jerk are not Exceeded.  
-It does not exceed the limits of max acceleration and jerk.
+> It does not exceed the limits of max acceleration and jerk.
 The acceleration is adjusted by some experiments. When the car starts moving at the begging,
 it is expected to accelerate 2.0 MPH during 0.02 seconds, which is 2.0 * 1609.34 / (3600 * 0.02) = 44.07 m/s2. This does not mean that the car accelerates 44.07 m/s2 since this value is used to generate the trajectories of future path. It was set this way, since it takes too much time for the car to speed up if the acceleration is set less than 10 m/s2 at the begging.
 When the car speed becomes faster than 30 MPH, the acceleration is set 0.8 MPH, which is 0.8 * 1609.34 / (3600 * 0.02) = 17.9 m /s2. The deceleration is the same with minus value.
-With these settings, after some tries, it was confirmed that the max acceleration and the jerk did not exceed the limit. (line 484-496)
+With these settings, after some tries, it was confirmed that the max acceleration and the jerk did not exceed the limit. (line 484-496 in main.cpp)
 
 6) Car does not have collisions.  
-It does not have collisions. The code checks if others cars are within plus minus 30 meter. If they are, the cost of the chosen actions are penalized with higher cost values. (line 195-219)
+> It does not have collisions. The code checks if others cars are within plus minus 30 meter. If they are, the cost of the chosen actions are penalized with higher cost values. (line 195-219 in main.cpp)
 
 7) The car stays in its lane, except for the time between changing lanes.  
-It does stay in its lane except lane changes. The future trajectories are drawn based on which lanes to go. Once the lane to drive is chosen, a continuous trajectory is drawn for the next 30, 60 and 90m on the Frenet coordinate. The car follows this trajectory, and it does not stop in the middle of the lane. (line 563-565)
+> It does stay in its lane except lane changes. The future trajectories are drawn based on which lanes to go. Once the lane to drive is chosen, a continuous trajectory is drawn for the next 30, 60 and 90m on the Frenet coordinate. The car follows this trajectory, and it does not stop in the middle of the lane. (line 563-565 in main.cpp)
 
 8) The car is able to change lanes  
-If other cars are ahead of the Ego car, and the distance between other cars and the Ego car gets closer, if no other car stays on either of left or right lanes, and if it has clearance of plus minus 30 meter in either left or right lane, it changes the lane based on the calculated costs of lane change vs staying in current lane. (calculate_cost_pos() line 195-218)
+> If other cars are ahead of the Ego car, and the distance between other cars and the Ego car gets closer, if no other car stays on either of left or right lanes, and if it has clearance of plus minus 30 meter in either left or right lane, it changes the lane based on the calculated costs of lane change vs staying in current lane. (calculate_cost_pos() line 195-218 in main.cpp)
 
 
 ### Simulator.
