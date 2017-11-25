@@ -1,6 +1,8 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
 
+-----
+
 ### Project writeup
 1) The code compiles correctly.  
 > Yes, it does. See [this](https://github.com/smashkoala/CarND-Path-Planning-Project) repository in GitHub.
