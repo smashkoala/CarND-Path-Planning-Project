@@ -29,10 +29,10 @@ In the cost calculation function, the actions that exceeds over 47MPH are severe
 The acceleration is adjusted by some experiments. When the car starts moving at the begging,
 it is expected to accelerate 2.0 MPH during 0.02 seconds, which is 2.0 * 1609.34 / (3600 * 0.02) = 44.07 m/s2. This does not mean that the car accelerates 44.07 m/s2 since this value is used to generate the trajectories of future path. It was set this way, since it takes too much time for the car to speed up if the acceleration is set less than 10 m/s2 at the begging.
 When the car speed becomes faster than 30 MPH, the acceleration is set 0.8 MPH, which is 0.8 * 1609.34 / (3600 * 0.02) = 17.9 m /s2. The deceleration is the same with negative value.
-With these settings, after some experiments, it was confirmed that the max acceleration and the jerk did not exceed the limit. (line 484-496 in main.cpp)
+With these settings, after some experiments, it was confirmed that the max acceleration and the jerk did not exceed the limits. (line 484-496 in main.cpp)
 
 6) Car does not have collisions.  
-> It does not have collisions. The code checks if others cars are within plus minus 30 meter. If they are, the cost of the chosen actions are penalized with higher cost values. (line 195-219 in main.cpp)
+> It does not have collisions. The code checks if others cars are within plus minus 30 meters. If they are, the cost of the chosen actions are penalized with higher cost values. (line 195-219 in main.cpp)
 
 7) The car stays in its lane, except for the time between changing lanes.  
 > It does stay in its lane except lane changes. The future trajectories are drawn based on which lanes to go. Once the lane to drive is chosen, a continuous trajectory is drawn for the next 30, 60 and 90m on the Frenet coordinate. The car follows this trajectory, and it does not stop in the middle of the lane. (line 563-565 in main.cpp)
