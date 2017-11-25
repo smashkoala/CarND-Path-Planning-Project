@@ -36,7 +36,7 @@ With these settings, after some experiments, it was confirmed that the max accel
 > It does stay in its lane except lane changes. The future trajectories are drawn based on which lanes to go. Once the lane to drive is chosen, a continuous trajectory is drawn for the next 30, 60 and 90m on the Frenet coordinate. The car follows this trajectory, and it does not stop in the middle of the lane. (line 563-565 in main.cpp)
 
 8) The car is able to change lanes  
-> If other cars are ahead of the Ego car, and the distance between other cars and the Ego car gets closer, if no other car stays on either of left or right lanes, and if it has clearance of plus minus 30 meter in either left or right lane, it changes the lane based on the calculated costs of lane change vs staying in current lane. (calculate_cost_pos() line 195-218 in main.cpp)
+> When other cars are ahead of the Ego car, and the distance between other cars and the Ego car gets closer, if no other car stays on either of left or right lanes, and if it has clearance of plus minus 30 meter in either left or right lane, it changes the lane based on the calculated costs of lane change vs staying in current lane. (calculate_cost_pos() line 195-218 in main.cpp)
 
 
 ### Simulator.
